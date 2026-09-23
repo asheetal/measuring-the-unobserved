@@ -47,3 +47,8 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+artifacts/
+*.hdf5
+*.model
+*.RData
+*.rds
