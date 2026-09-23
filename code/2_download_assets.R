@@ -11,7 +11,7 @@ CODER  <- "--coder" %in% args
 HERE       <- dirname(normalizePath(sub("^--file=", "",
                 grep("^--file=", commandArgs(FALSE), value = TRUE)[1])))
 ARTIFACTS  <- Sys.getenv("MU_ARTIFACTS", file.path(dirname(HERE), "artifacts"))
-RECORD_ID  <- "22880417"
+ARTICLE_ID <- "33973036"   # figshare, doi 10.6084/m9.figshare.33973036
 MODEL_FILE <- file.path(ARTIFACTS, "model_output_2025-03-27.hdf5")
 JOKE_TGZ   <- file.path(ARTIFACTS, "archived_coders_muppet-roberta-base-joke_detector.tar.gz")
 HF_HUB     <- path.expand("~/.cache/huggingface/hub")
@@ -38,7 +38,23 @@ fix_refs <- function(model_dir) {
 options(timeout = 36000)
 dir.create(ARTIFACTS, showWarnings = FALSE, recursive = TRUE)
 
-zenodo <- function(f) sprintf("https://zenodo.org/records/%s/files/%s?download=1", RECORD_ID, f)
+# figshare serves files by numeric id, so look the ids up by name once.
+figshare_index <- function() {
+  con <- url(sprintf("https://api.figshare.com/v2/articles/%s/files", ARTICLE_ID), open = "rb")
+  on.exit(close(con))
+  txt <- paste(readLines(con, warn = FALSE), collapse = "")
+  names  <- regmatches(txt, gregexpr('"name":\\s*"[^"]+"', txt))[[1]]
+  names  <- sub('^"name":\\s*"', "", sub('"$', "", names))
+  urls   <- regmatches(txt, gregexpr('"download_url":\\s*"[^"]+"', txt))[[1]]
+  urls   <- sub('^"download_url":\\s*"', "", sub('"$', "", urls))
+  setNames(urls, names)
+}
+
+INDEX <- tryCatch(figshare_index(), error = function(e) character())
+if (!length(INDEX)) {
+  cat("Cannot reach figshare. Check the connection and rerun.\n")
+  quit(status = 1)
+}
 
 get_file <- function(path, min_bytes) {
   if (file.exists(path) && file.size(path) < min_bytes) {
@@ -47,7 +63,9 @@ get_file <- function(path, min_bytes) {
   }
   if (file.exists(path)) { message("present: ", basename(path)); return(TRUE) }
   message("downloading ", basename(path))
-  ok <- tryCatch({ utils::download.file(zenodo(basename(path)), path, mode = "wb"); TRUE },
+  src <- INDEX[[basename(path)]]
+  if (is.null(src)) { message("not on figshare: ", basename(path)); return(FALSE) }
+  ok <- tryCatch({ utils::download.file(src, path, mode = "wb"); TRUE },
                  error = function(e) FALSE)
   if (!ok || !file.exists(path) || file.size(path) < min_bytes) {
     message("download failed: ", basename(path))
