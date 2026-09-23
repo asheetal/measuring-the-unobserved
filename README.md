@@ -13,7 +13,7 @@ numbered scripts that score new evaluations.
 
 ## Trained models
 
-Five files are archived on Zenodo under DOI 10.5281/zenodo.22880417: four word2vec
+Six files are archived on figshare under DOI 10.6084/m9.figshare.33973036: four word2vec
 models fine-tuned on the evaluations written about instructors of each ethnicity
 (`word2vec_white.42B.model`, `word2vec_black.42B.model`,
 `word2vec_hispanic.42B.model`, `word2vec_asian.42B.model`) and the trained network
@@ -43,7 +43,7 @@ chmod +x 1_environment_check.R 2_download_assets.R 3_run.R   # once, after cloni
 
 `1_environment_check.R` reports what is installed, installs the core R packages,
 and names what is missing. `2_download_assets.R` downloads the trained network
-from Zenodo. `3_run.R` scores evaluations and prints a probability for each of
+from figshare. `3_run.R` scores evaluations and names the group the network assigns to each of
 the four groups, one row per evaluation.
 
 Four ways to call the scorer:
@@ -96,7 +96,7 @@ hf auth login
 ```
 
    `Reggie/muppet-roberta-base-joke_detector` has since been withdrawn from
-   Hugging Face, so a copy is archived on Zenodo and this command unpacks it
+   Hugging Face, so a copy is archived on figshare and this command unpacks it
    into the local cache. The other thirty-one come from Hugging Face:
 
 ```bash
@@ -181,7 +181,7 @@ far:
   which is usually immediate. Then rerun.
 - `Reggie/muppet-roberta-base-joke_detector` has been withdrawn altogether, so
   no access request is possible. `./2_download_assets.R --coder` restores it
-  from the Zenodo archive.
+  from the figshare archive.
 
 The same procedure applies to any other model that becomes gated later: open the
 URL printed in the error, request access on that page, and rerun. If the model
