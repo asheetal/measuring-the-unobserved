@@ -937,13 +937,13 @@ add_joke <- function(df = NULL) {
     device <- ifelse(torch$cuda$is_available(), "cuda", "cpu")
     autotoken <- transformer$AutoTokenizer
     autoModelClass <- transformer$AutoModelForSequenceClassification
-    model <- autoModelClass$from_pretrained("Reggie/muppet-roberta-base-joke_detector", use_cache=T)
+    model <- autoModelClass$from_pretrained("Reggie/muppet-roberta-base-joke_detector", use_cache=T, local_files_only=TRUE)
     # Check if multiple GPUs are available and wrap the model with DataParallel
     if (torch$cuda$device_count() > 1) {
       model <- torch$nn$DataParallel(model)
     }
     model <- model$to(device)
-    tokenizer <- autotoken$from_pretrained("Reggie/muppet-roberta-base-joke_detector", use_cache=T)
+    tokenizer <- autotoken$from_pretrained("Reggie/muppet-roberta-base-joke_detector", use_cache=T, local_files_only=TRUE)
     inputs <- tokenizer(df.chunked[[i]]$text, padding=TRUE, truncation = TRUE, return_tensors='pt', max_length = 512L) # pt stands for pytorch
     inputs <- inputs$to(device)
     outputs <- model(inputs$input_ids, attention_mask=inputs$attention_mask)
